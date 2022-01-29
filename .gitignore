@@ -1,0 +1,14 @@
+# Yarn
+node_modules
+
+# Environment
+.env
+
+# production
+/build
+
+# certs
+/certificates
+
+# Local Netlify folder
+.netlify
