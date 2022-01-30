@@ -22,3 +22,8 @@ const signElement = {
     pisces: elements.water,
     ophiuchus: 'Ophiuchus', // TODO: ophiuchus element?
 }
+
+module.exports = {
+    elements,
+    signElement
+}
