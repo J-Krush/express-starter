@@ -2,6 +2,10 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const { Origin, Horoscope } = require("circular-natal-horoscope-js")
 
+// Constants
+const { signElement } = require('./constants/astrological-constants')
+const { dagaraElement } = require('./helpers/mappingFunctions')
+
 // Create express app
 const app = express()
 const port = 5000
@@ -13,8 +17,10 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.post('/elemental-code', async function (req, res) {
     console.log('elemental code endpoint: ', req.body)
 
+    const year = 1989
+
     const origin = new Origin({
-        year: 1989,
+        year,
         month: 5, // 0 = January, 11 = December!
         date: 29,
         hour: 14,
@@ -34,7 +40,13 @@ app.post('/elemental-code', async function (req, res) {
         language: 'en'
     })
 
-    console.log(horoscope.CelestialBodies)
+    console.log('1: ', dagaraElement(year))
+
+    console.log('2: ', signElement[horoscope.SunSign.key])
+
+    console.log('3: ', signElement[horoscope.CelestialPoints.northnode.Sign.key])
+
+    console.log('5: ', signElement[horoscope.CelestialPoints.southnode.Sign.key])
     
     res.sendStatus(200)
 })
