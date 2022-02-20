@@ -20,7 +20,7 @@ const signElement = {
     capricorn: elements.earth,
     aquarius: elements.air,
     pisces: elements.water,
-    ophiuchus: 'Ophiuchus', // TODO: ophiuchus element?
+    ophiuchus: 'Ophiuchus', // TODO: what is ophiuchus element?
 }
 
 module.exports = {
