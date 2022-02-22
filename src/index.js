@@ -18,9 +18,6 @@ const port = 5000
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
-const jsdom = require('jsdom')
-const { JSDOM } = jsdom
-
 app.post('/elemental-code', async function (req, res) {
     console.log('elemental code endpoint: ', req.body)
 
