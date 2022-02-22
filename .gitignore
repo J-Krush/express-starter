@@ -13,5 +13,5 @@ node_modules
 # Local Netlify folder
 .netlify
 
-# export folder
-/exports
+# temp folder
+/src/temp
