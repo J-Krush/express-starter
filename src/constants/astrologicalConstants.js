@@ -22,6 +22,22 @@ const signElement = {
     pisces: elements.water,
     ophiuchus: 'Ophiuchus', // TODO: what is ophiuchus element?
 }
+const celestialBodies = {
+    sun: "Sun",
+	moon: "Moon",
+	mercury: "Mercury",
+	venus: "Venus",
+	mars: "Mars",
+	jupiter: "Jupiter",
+	saturn: "Saturn",
+	uranus: "Uranus",
+	neptune: "Neptune",
+	pluto: "Pluto",
+	chiron: "Chiron",
+	lilith: "Lilith",
+	nnode: "NNode",
+}
+
 
 module.exports = {
     elements,
