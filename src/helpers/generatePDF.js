@@ -4,16 +4,24 @@ const path = require('path')
 
 const tempHTMLFilePath = "../temp/temp.html"
 
-const writeTempHTML = () => {
+const exampleData = {
+    "planets":{"Lilith":[18], "Chiron":[18], "Pluto":[63], "Neptune":[110, 0.2], "Uranus":[318], "Saturn":[201, -0.2], "Jupiter":[192], "Mars":[210], "Moon":[268], "Sun":[281], "Mercury":[312], "Venus":[330], "NNode":[2]},
+    "cusps":[296, 350, 30, 56, 75, 94, 116, 170, 210, 236, 255, 274]			
+}
 
-    const data = {
-        "planets":{"Lilith":[18], "Chiron":[18], "Pluto":[63], "Neptune":[110, 0.2], "Uranus":[318], "Saturn":[201, -0.2], "Jupiter":[192], "Mars":[210], "Moon":[268], "Sun":[281], "Mercury":[312], "Venus":[330], "NNode":[2]},
-        "cusps":[296, 350, 30, 56, 75, 94, 116, 170, 210, 236, 255, 274]			
-    }
+const writeTempHTML = async (data = exampleData, htmlContent = '') => {
+
+    // const data = {
+    //     "planets":{"Lilith":[18], "Chiron":[18], "Pluto":[63], "Neptune":[110, 0.2], "Uranus":[318], "Saturn":[201, -0.2], "Jupiter":[192], "Mars":[210], "Moon":[268], "Sun":[281], "Mercury":[312], "Venus":[330], "NNode":[2]},
+    //     "cusps":[296, 350, 30, 56, 75, 94, 116, 170, 210, 236, 255, 274]			
+    // }
 
     const dataAsString = JSON.stringify(data)
 
-    const content = `
+    var content = htmlContent
+
+    if (htmlContent == '') {
+        content = `
         <html lang="en">
             <head>
                 <meta charset="utf-8">
@@ -44,6 +52,7 @@ const writeTempHTML = () => {
             </body>
         </html>
         `
+    }
     const newFilePath = path.join(__dirname, tempHTMLFilePath)
 
     try {
@@ -67,9 +76,6 @@ const generatePDF = async () => {
 				headless: true,
 			})
 		}
-
-        // Write the html file to render
-        writeTempHTML()
 
         const context = await browser.createIncognitoBrowserContext()
 		const page = await context.newPage()
@@ -104,5 +110,6 @@ const generatePDF = async () => {
 }
 
 module.exports = {
-    generatePDF
+    generatePDF,
+    writeTempHTML
 }
