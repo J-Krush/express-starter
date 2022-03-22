@@ -1,14 +1,20 @@
 const express = require('express')
 const bodyParser = require('body-parser')
+const { DateTime } = require("luxon")
+const fetch = require('node-fetch')
 const { Origin, Horoscope } = require('circular-natal-horoscope-js')
 // TODO: Add rate limiter: https://www.npmjs.com/package/express-rate-limit
 
+// Planetary calculations
+const { getNatalChart, requestNasaData, getSiderealTimeDegrees, getAscendantDegrees, getEclipcticLongitude } = require('./helpers/astrologyCalculations')
+
 // PDF
-const { generatePDF } = require('./helpers/generatePDF')
+const { generatePDF, writeTempHTML } = require('./helpers/generatePDF')
 
 // Constants
-const { signElement } = require('./constants/astrologicalConstants')
-const { dagaraElement } = require('./helpers/codeFunctions')
+const { 
+    fullElementalCode,
+    mapHoroscopeToChart } = require('./helpers/codeFunctions')
 
 // Create express app
 const app = express()
@@ -19,42 +25,26 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
 app.post('/elemental-code', async function (req, res) {
-    console.log('elemental code endpoint: ', req.body)
 
-    const year = 1989
+    // Check for body and arguments
+    if (!req.body || !req.body.lat || !req.body.lon || !req.body.dateTime) {
+        res.send({
+            message: "Missing arguments",
+            code: 422,
+            error: true
+        })
+        return
+    }
 
-    const origin = new Origin({
-        year,
-        month: 5, // 0 = January, 11 = December!
-        date: 29,
-        hour: 14,
-        minute: 32,
-        latitude: 45.7833,
-        longitude: -108.5007,
-    })
+    // Parse for arguments
+    const lat = req.body.lat
+    const lon = req.body.lon
 
-    const horoscope = new Horoscope({
-        origin: origin,
-        houseSystem: "whole-sign",
-        zodiac: "sidereal",
-        aspectPoints: ['bodies', 'points', 'angles'],
-        aspectWithPoints: ['bodies', 'points', 'angles'],
-        aspectTypes: ["major", "minor"],
-        customOrbs: {},
-        language: 'en'
-    })
+    const dateTimeString = req.body.dateTime
+    const dateTime = DateTime.fromISO(dateTimeString)
 
-    console.log('1 (Indigenious): ', dagaraElement(year))
+    await getNatalChart(dateTime, lat, lon)
 
-    console.log('2 (): ', signElement[horoscope.SunSign.key], ' (', horoscope.SunSign.key, ')')
-
-    console.log('3: ', signElement[horoscope.CelestialPoints.northnode.Sign.key], ' (', horoscope.CelestialPoints.northnode.Sign.key, ')')
-
-    // TODO 4: 
-
-
-    console.log('5: ', signElement[horoscope.CelestialPoints.southnode.Sign.key], ' (', horoscope.CelestialPoints.southnode.Sign.key, ')')
-    
     res.sendStatus(200)
 })
 
@@ -76,8 +66,8 @@ app.post('/chart', async function (req, res) {
 
     const horoscope = new Horoscope({
         origin: origin,
-        houseSystem: "whole-sign",
-        zodiac: "sidereal",
+        houseSystem: "topocentric",
+        zodiac: "sidereal", 
         aspectPoints: ['bodies', 'points', 'angles'],
         aspectWithPoints: ['bodies', 'points', 'angles'],
         aspectTypes: ["major", "minor"],
@@ -85,26 +75,33 @@ app.post('/chart', async function (req, res) {
         language: 'en'
     })
 
-    // console.log('celestial bodies: ', horoscope.CelestialBodies.all)
+    fullElementalCode(origin.year, horoscope)
 
-    horoscope.CelestialBodies.all.forEach(item => {
-        console.log(item.key, ': ', item.ChartPosition.Ecliptic.DecimalDegrees)
-    })
+    const cleanedData = mapHoroscopeToChart(horoscope)
 
-
-
-    // for (body in horoscope.CelestialBodies.all) {
-    //     console.log(body)
-    // }
-    // console.log(horoscope.CelestialBodies.all.ChartPosition)
-
-    // console.log(horoscope.Angles)
+    // Write the html file to render
+    await writeTempHTML()
 
     const pdf = await generatePDF()
 
-    console.log('pdf: ', pdf)
+    res.sendStatus(200)
+})
 
-    // res.send(pdf)
+app.post('/mtz', async function (req, res) {
+    console.log('mtz endpoint')
+
+    const lat = 40.730610
+    const lon = -73.935242
+
+    const localHour = 12
+    const minute = 00
+
+    const utcHour = localHour + 4
+
+    const nasaData = await requestNasaData(1989, 6, 29, utcHour, minute, lat, lon)
+    const siderealTimeDegrees = getSiderealTimeDegrees(nasaData, utcHour, minute)
+    const ecLon = getEclipcticLongitude(nasaData, utcHour, minute)
+    const ascendant = getAscendantDegrees(siderealTimeDegrees, lat)
 
     res.sendStatus(200)
 })
