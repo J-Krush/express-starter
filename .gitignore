@@ -19,3 +19,5 @@ node_modules
 # Example files
 /src/helpers/astrochart.js
 /src/helpers/astrochart.min.js
+/src/helpers/mtz-jk-return-planet-positions.json
+/src/helpers/mtz-jk-return.html
