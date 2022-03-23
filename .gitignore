@@ -15,3 +15,7 @@ node_modules
 
 # temp folder
 /src/temp
+
+# Example files
+/src/helpers/astrochart.js
+/src/helpers/astrochart.min.js
