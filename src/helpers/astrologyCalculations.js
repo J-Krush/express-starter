@@ -6,18 +6,18 @@ const earthInclination = 23.4392911
 
 
 const getTimeZone = async (dateTime, lat, lon) => {
+    // Setting up timezone API: https://developers.google.com/maps/documentation/timezone/get-api-key
+
     var url = 'https://maps.googleapis.com/maps/api/timezone/json?'
+    const args = `location=${lat}%2C${lon}&timestamp=${dateTime.toSeconds()}&key=${process.env.GCP_API_KEY}`
+    url = url + args
 
-    console.log('timestamp: ', dateTime.toSeconds())
+    const response = await fetch(url)
+    const data = await response.json()
 
-    url = url + `location=${lat}%2C${lon}&timestamp=${dateTime.toSeconds()}&key=YOUR_API_KEY`
-    // var config = {
-    //     method: 'get',
-    //     url: ,
-    //     headers: { }
-    //   };
+    const timeZoneOffset = Math.floor((data.dstOffset + data.rawOffset) / 3600)
 
-    return -4
+    return timeZoneOffset
 }
 
 const getNatalChart = async (dateTime, lat, lon) => {
@@ -30,7 +30,7 @@ const getNatalChart = async (dateTime, lat, lon) => {
 
     const timeZoneOffset = await getTimeZone(dateTime, lat, lon)
 
-    console.log('time zone: ', timeZoneOffset)
+    console.log('time zone offset: ', timeZoneOffset)
 
     const utcHour = hour - timeZoneOffset
 
@@ -47,6 +47,7 @@ const getNatalChart = async (dateTime, lat, lon) => {
 
 const requestNasaData = async (year, month, day, hour, minute, lat, lon) => {
 
+    const url = 'https://ssd.jpl.nasa.gov/api/horizons.api?'
     var arguments = "format=json&MAKE_EPHEM='YES'&COMMAND='301'&EPHEM_TYPE='OBSERVER'&CENTER='coord@399'&COORD_TYPE='GEODETIC'"
     const coordinates = `&SITE_COORD='${lon},${lat},0'`
     const startTime = `&START_TIME='${year}-${getDoubleDigitNumber(month)}-${getDoubleDigitNumber(day)} ${getDoubleDigitNumber(hour)}:${getDoubleDigitNumber(minute)}'`
@@ -58,14 +59,10 @@ const requestNasaData = async (year, month, day, hour, minute, lat, lon) => {
 
     arguments = arguments + coordinates + startTime + stopTime + otherArgs
 
-    console.log('url: ', `https://ssd.jpl.nasa.gov/api/horizons.api?${arguments}`)
+    console.log('url: ', url + arguments)
 
-    const response = await fetch(`https://ssd.jpl.nasa.gov/api/horizons.api?${arguments}`)
+    const response = await fetch(url + arguments)
     const data = await response.json()
-
-
-
-    console.log('data: ', data)
 
     // Nasa api results
     const nasaBody = data.result

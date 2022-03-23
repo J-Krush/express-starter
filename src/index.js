@@ -1,6 +1,7 @@
 const express = require('express')
+const dotenv = require('dotenv')
 const bodyParser = require('body-parser')
-const { DateTime } = require("luxon")
+const { DateTime } = require('luxon')
 const fetch = require('node-fetch')
 const { Origin, Horoscope } = require('circular-natal-horoscope-js')
 // TODO: Add rate limiter: https://www.npmjs.com/package/express-rate-limit
@@ -12,9 +13,11 @@ const { getNatalChart, requestNasaData, getSiderealTimeDegrees, getAscendantDegr
 const { generatePDF, writeTempHTML } = require('./helpers/generatePDF')
 
 // Constants
-const { 
-    fullElementalCode,
-    mapHoroscopeToChart } = require('./helpers/codeFunctions')
+const { fullElementalCode, mapHoroscopeToChart } = require('./helpers/codeFunctions')
+
+
+// Load environment variables from .env
+dotenv.config()
 
 // Create express app
 const app = express()
