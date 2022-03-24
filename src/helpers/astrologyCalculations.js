@@ -1,8 +1,14 @@
 const fetch = require('node-fetch')
+const { requestPromise } = require('../helpers/network')
+const { celestialBodies } = require('../constants/astrologicalConstants')
 
+// Constants 
+// Sound info found here: https://en.wikipedia.org/wiki/Ascendant
+const earthInclination = 23.4392911 // deg
+const trueSiderealOffset = 31.5 // deg
 
-// Constants found here: https://en.wikipedia.org/wiki/Ascendant
-const earthInclination = 23.4392911
+// Horizons API 
+const nasaUrl = 'https://ssd.jpl.nasa.gov/api/horizons.api?format=json'
 
 
 const getTimeZone = async (dateTime, lat, lon) => {
@@ -37,46 +43,96 @@ const getNatalChart = async (dateTime, lat, lon) => {
     console.log('utcHour: ', utcHour)
 
     // Request data from nasa horizons API
-    const nasaData = await requestNasaData(year, month, day, utcHour, minute, lat, lon)
-    // const siderealTimeDegrees = getSiderealTimeDegrees(nasaData, utcHour, minute)
-    // const ecLon = getEclipcticLongitude(nasaData, utcHour, minute)
-    // const ascendant = getAscendantDegrees(siderealTimeDegrees, lat)
+    const planetaryPositions = await getPlanetaryData(year, month, day, utcHour, minute, lat, lon)
+    const lunarNode = await getLunarNodeData(year, month, day, utcHour, minute, lat, lon)
+    const northNode = planetaryPositions.ascendant + trueSiderealOffset - lunarNode
+
+    console.log('planetaryPositions: ', planetaryPositions)
+    console.log('northNode: ', northNode)
+
+    // console.log('cleanedData: ', cleanedData)
+
+    return {}
 
 }
 
 
-const requestNasaData = async (year, month, day, hour, minute, lat, lon) => {
+const getPlanetaryData = async (year, month, day, hour, minute, lat, lon) => {
+    // Gets the chart angle for each planet (measure from the left, clockwise)
+    console.log('get planetary data')
 
-    const url = 'https://ssd.jpl.nasa.gov/api/horizons.api?'
-    var arguments = "format=json&MAKE_EPHEM='YES'&COMMAND='301'&EPHEM_TYPE='OBSERVER'&CENTER='coord@399'&COORD_TYPE='GEODETIC'"
+    const args = "&MAKE_EPHEM='YES'&EPHEM_TYPE='OBSERVER'&CENTER='coord@399'&COORD_TYPE='GEODETIC'&STEP_SIZE='1 MINUTES'&QUANTITIES='7,31'&REF_SYSTEM='ICRF'&CAL_FORMAT='CAL'&APPARENT='AIRLESS'&SKIP_DAYLT='NO'"
     const coordinates = `&SITE_COORD='${lon},${lat},0'`
     const startTime = `&START_TIME='${year}-${getDoubleDigitNumber(month)}-${getDoubleDigitNumber(day)} ${getDoubleDigitNumber(hour)}:${getDoubleDigitNumber(minute)}'`
     const stopTime = `&STOP_TIME='${year}-${getDoubleDigitNumber(month)}-${getDoubleDigitNumber(day)} ${getDoubleDigitNumber(hour)}:${getDoubleDigitNumber(minute + 1)}'`
 
-    var otherArgs = "&STEP_SIZE='1 MINUTES'&QUANTITIES='7,31'&REF_SYSTEM='ICRF'&CAL_FORMAT='CAL'&APPARENT='AIRLESS'&SKIP_DAYLT='NO'"
-    var otherArgsNotWorking = "&TIME_DIGITS='MINUTES'&ANG_FORMAT='HMS'&RANGE_UNITS='AU'&SUPPRESS_RANGE_RATE='NO'&SOLAR_ELONG='0,180'&EXTRA_PREC='NO'&RTS_ONLY='NO'&CSV_FORMAT='NO'&OBJ_DATA='YES'"
+    // Loop through all bodies
+    const bodies = Object.keys(celestialBodies)
+    var positions = {}
 
+    for (let i = 0; i < bodies.length; i++) {  
+        const key = bodies[i]
+        const body = celestialBodies[key]
 
-    arguments = arguments + coordinates + startTime + stopTime + otherArgs
+        if (typeof body.code !== "number" || body.title === 'Earth') continue
 
-    console.log('url: ', url + arguments)
+        // console.log(`${key}: ${body.code}`)
+        const command = `&COMMAND='${body.code}'`
 
-    const response = await fetch(url + arguments)
-    const data = await response.json()
+        const arguments = args + command + coordinates + startTime + stopTime
 
-    // Nasa api results
-    const nasaBody = data.result
+        try {
+            const response = await requestPromise(nasaUrl + arguments)
+            // console.log('response: ', response)
 
-    return nasaBody
+            if (i === 0) { 
+                // If the first iteration, calculate the ascendant
+                const ascendant = getAscendantDegrees(response, hour, minute, lat)
+                positions.ascendant = ascendant
+            }
 
+            const ecLon = parseForEclipcticLongitude(response, hour, minute)
+
+            // Corrects for ascendant rotation and true sidereal offset
+            positions[key] = positions.ascendant + trueSiderealOffset - ecLon
+            
+            // console.log("response for body ", body.title, '****************', response, ' ****************');
+        } catch (error) {
+            console.log("error for body ", body.title, ' ****************', error, ' ****************');
+        }
+        
+    }
+
+    return positions
 }
 
-const getSiderealTimeDegrees = (nasaBody, hour, minute) => {
-    // Calcuates ecliptic geocentric longitude which is easterly on the horizon: https://en.wikipedia.org/wiki/Ascendant#Calculation
+const getLunarNodeData = async (year, month, day, hour, minute, lat, lon) => {
+    // Gets ecliptic longitude of ascending node
 
-    console.log('string to find: ', `${getDoubleDigitNumber(hour)}:${getDoubleDigitNumber(minute)} *m `)
+    const args = "&MAKE_EPHEM='YES'&COMMAND='301'&EPHEM_TYPE='ELEMENTS'&CENTER='500@399'"
+    const coordinates = `&SITE_COORD='${lon},${lat},0'`
+    const startTime = `&START_TIME='${year}-${getDoubleDigitNumber(month)}-${getDoubleDigitNumber(day)} ${getDoubleDigitNumber(hour)}:${getDoubleDigitNumber(minute)}'`
+    const stopTime = `&STOP_TIME='${year}-${getDoubleDigitNumber(month)}-${getDoubleDigitNumber(day)} ${getDoubleDigitNumber(hour)}:${getDoubleDigitNumber(minute + 1)}'`
+    const otherArgs = "&STEP_SIZE='1 MINUTES'&REF_SYSTEM='ICRF'&REF_PLANE='ECLIPTIC'&OUT_UNITS='KM-S'&ELM_LABELS='YES'&TP_TYPE='ABSOLUTE'&CSV_FORMAT='NO'&OBJ_DATA='YES'"
 
-    const index = nasaBody.indexOf(`${getDoubleDigitNumber(hour)}:${getDoubleDigitNumber(minute)} *m `)
+    const arguments = args + coordinates + startTime + stopTime + otherArgs
+
+    const response = await fetch(nasaUrl + arguments)
+    const data = await response.json()
+
+    const ascendingNode = parseForAscendingNode(data.result)
+    
+    return ascendingNode
+}
+
+const getAscendantDegrees = (nasaBody, hour, minute, lat) => {
+    // Uses ecliptic geocentric longitude calculation defined here:
+    // https://en.wikipedia.org/wiki/Ascendant#Calculation
+
+    console.log('nasabody: ', nasaBody)
+
+    console.log('string to search: ', `${getDoubleDigitNumber(hour)}:${getDoubleDigitNumber(minute)} *`)
+    const index = nasaBody.indexOf(`${getDoubleDigitNumber(hour)}:${getDoubleDigitNumber(minute)} *`)
 
     console.log('index: ', index)
 
@@ -89,17 +145,14 @@ const getSiderealTimeDegrees = (nasaBody, hour, minute) => {
     const siderealMinute = (Number(siderealTime.substring(3, 5)) / 60) * 15
     const siderealSecond = (Number(siderealTime.substring(6, 8)) / 60) * 0.15
 
-    console.log('siderealHour: ', siderealHour)
-    console.log('siderealMinute: ', siderealMinute)
-    console.log('siderealSecond: ', siderealSecond)
+    // console.log('siderealHour: ', siderealHour)
+    // console.log('siderealMinute: ', siderealMinute)
+    // console.log('siderealSecond: ', siderealSecond)
 
     const siderealTimeDegrees = siderealHour + siderealMinute + siderealSecond
 
-    return siderealTimeDegrees
-}
-
-const getAscendantDegrees = (siderealTimeDegrees, lat) => {
-
+    console.log('siderealTimeDegrees: ', siderealTimeDegrees)
+    
     const siderealTimeRadians = siderealTimeDegrees * (Math.PI / 180)
 
     // Converting input degrees to radians for javascript
@@ -116,6 +169,8 @@ const getAscendantDegrees = (siderealTimeDegrees, lat) => {
 
     var ascendantDegrees = ascendantRadians * (180 / Math.PI )
 
+    console.log('ascendant degrees: ', ascendantDegrees)
+
     // Ascendant quadrant rules
     if (x < 0) {
         ascendantDegrees = ascendantDegrees + 180
@@ -130,25 +185,36 @@ const getAscendantDegrees = (siderealTimeDegrees, lat) => {
     }
 
     // Converting to true sidereal zodiac
-    ascendantDegrees = ascendantDegrees - 31.5
+    ascendantDegrees = ascendantDegrees - trueSiderealOffset
 
-    console.log('ascendantDegrees: ', ascendantDegrees)
+    console.log('ascendant degrees: ', ascendantDegrees)
+
+    return ascendantDegrees
 }
 
-const getEclipcticLongitude = (nasaBody, hour, minute) => {
-    console.log('string to find: ', `${getDoubleDigitNumber(hour)}:${getDoubleDigitNumber(minute)} *m `)
+const parseForEclipcticLongitude = (nasaBody, hour, minute) => {
+    // console.log('string to find: ', `${getDoubleDigitNumber(hour)}:${getDoubleDigitNumber(minute)} *`)
 
     // Getting observer ecliptic longitude
-    const index = nasaBody.indexOf(`${getDoubleDigitNumber(hour)}:${getDoubleDigitNumber(minute)} *m `)
+    const index = nasaBody.indexOf(`${getDoubleDigitNumber(hour)}:${getDoubleDigitNumber(minute)} *`)
 
-    console.log('index: ', index)
+    // console.log('index: ', index)
 
     let ecLon = nasaBody.substring(index + 25, index + 35)
 
-    console.log('ecLon: ', Number(ecLon))
+    // console.log('ecLon: ', Number(ecLon))
 
     return Number(ecLon)
 }
+
+const parseForAscendingNode = (nasaBody, hour, minute) => {
+    const index = nasaBody.indexOf(`OM= `)
+
+    let om = nasaBody.substring(index + 4, index + 25)
+
+    return Number(om)
+}
+
 
 const getDoubleDigitNumber = (number) => {
     if (number > 9) return `${number}`
@@ -160,10 +226,8 @@ const getDoubleDigitNumber = (number) => {
 
 module.exports = {
     getNatalChart,
-    requestNasaData,
-    getSiderealTimeDegrees,
     getAscendantDegrees,
-    getEclipcticLongitude
+    parseForEclipcticLongitude
 }
 
 
