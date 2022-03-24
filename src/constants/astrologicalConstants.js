@@ -22,6 +22,22 @@ const signElement = {
     pisces: elements.water,
     ophiuchus: 'Ophiuchus', // TODO: what is ophiuchus element?
 }
+const signPosition = {
+    aries: 0.0,
+    taurus: 21.0,
+    gemini: 57.5,
+    cancer: 82.75,
+    leo: 103.0,
+    virgo: 141.25,
+    libra: 191.0,
+    scorpio: 210.0,
+    ophiuchus: 223.5,
+    sagittarius: 236.0,
+    capricorn: 269.0,
+    aquarius: 294.5,
+    pisces: 318.0,
+    
+}
 const celestialBodies = {
     sun: {title: 'Sun', code: 10},
 	moon: {title: 'Moon', code: 301},
