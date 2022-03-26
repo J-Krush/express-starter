@@ -58,5 +58,6 @@ const celestialBodies = {
 module.exports = {
     elements,
     signElement,
+    signPosition,
     celestialBodies
 }

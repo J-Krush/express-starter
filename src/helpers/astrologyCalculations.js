@@ -94,7 +94,7 @@ const getPlanetaryData = async (year, month, day, hour, minute, lat, lon) => {
             const ecLon = parseForEclipcticLongitude(response, hour, minute)
 
             // Corrects for ascendant rotation and true sidereal offset
-            positions[key] = positions.ascendant + trueSiderealOffset - ecLon
+            positions[key] = ecLon - trueSiderealOffset// positions.ascendant + trueSiderealOffset - ecLon
             
             // console.log("response for body ", body.title, '****************', response, ' ****************');
         } catch (error) {
@@ -152,7 +152,7 @@ const getAscendantDegrees = (nasaBody, hour, minute, lat) => {
     const siderealTimeDegrees = siderealHour + siderealMinute + siderealSecond
 
     console.log('siderealTimeDegrees: ', siderealTimeDegrees)
-    
+
     const siderealTimeRadians = siderealTimeDegrees * (Math.PI / 180)
 
     // Converting input degrees to radians for javascript
