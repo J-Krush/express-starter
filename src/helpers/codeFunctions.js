@@ -1,4 +1,5 @@
 const { elements, signElement } = require('../constants/astrologicalConstants')
+const { linearCode } = require('./utilities')
 
 const dagaraElement = (year) => {
     var lastDigitYear = Number.isInteger(year) ? year % 10 : parseInt(year.toString().substr(-1))
@@ -32,7 +33,7 @@ const dagaraElement = (year) => {
     }
 }
 
-const fullElementalCode = (year, horoscope) => {
+const fullElementalCode = (year, sunSign, nNode, sNode) => {
     // 1 (Indigenious): Dagara year
     // 2 (Achievement): Sidereal sun sign
     // 3 (Soul Path): South node
@@ -40,44 +41,51 @@ const fullElementalCode = (year, horoscope) => {
     // 5 (Multidimensional): North node
     // 6 Galactic: TODO
 
-    
+    console.log('full elemental code')
+    console.log('year: ', year)
+    console.log('sunSign: ', sunSign)
+    console.log('nNode: ', nNode)
+    console.log('sNode: ', sNode)
 
-    const indigenious = dagaraElement(year)
-    const sunSign = signElement[horoscope.SunSign.key]
-    const southNode = signElement[horoscope.CelestialPoints.southnode.Sign.key]
-    const legacy = '?'
-    const northNode = signElement[horoscope.CelestialPoints.northnode.Sign.key]
-    const galactic = '?'
+    const indigeniousElement = dagaraElement(year)
 
-    const rawArray = [indigenious, sunSign, southNode, legacy, northNode, galactic]
+    const sunSignElement = signElement[sunSign]
+    const southNodeElement = signElement[sNode]
+    const legacyElement = '?'
+    const northNodeElement = signElement[nNode]
+    const galacticElement = '?'
+
+    const rawArray = [indigeniousElement, sunSignElement, southNodeElement, legacyElement, northNodeElement, galacticElement]
+
+    console.log('rawArray: ', rawArray)
 
 
     // Build filtered code array. Start with indigenious.
-    var codeArray = [indigenious]
+    var codeArray = [indigeniousElement]
 
     // Achievement
-    if (sunSign !== indigenious) {
-        codeArray.push(sunSign)
+    if (sunSignElement !== indigeniousElement) {
+        codeArray.push(sunSignElement)
     } else {
         codeArray.push(elements.mineral)
     }
 
     // Soul Path
-    if (southNode !== indigenious && southNode !== sunSign) {
-        codeArray.push(southNode)
-    } else if (southNode === indigenious && southNode === sunSign) {
+    if (southNodeElement !== indigeniousElement && southNodeElement !== sunSignElement) {
+        codeArray.push(southNodeElement)
+    } else if (southNodeElement === indigeniousElement && southNodeElement === sunSignElement) {
         codeArray.push(elements.nature)
-    }  else if (southNode === indigenious || southNode === sunSign) {
+    }  else if (southNodeElement === indigeniousElement || southNodeElement === sunSignElement) {
         codeArray.push(elements.mineral)
     }
 
     // Legacy: TODO
-    codeArray.push(legacy)
+    codeArray.push(legacyElement)
 
     // Multidimensional
-    const duplicates = rawArray.slice(0, 3).filter(item => item === northNode).length
+    const duplicates = rawArray.slice(0, 3).filter(item => item === northNodeElement).length
     if (duplicates === 0) {
-        codeArray.push(northNode)
+        codeArray.push(northNodeElement)
     } else if (duplicates === 1 && codeArray.indexOf(elements.mineral) !== -1) {
         codeArray.push(elements.nature)
     } else if (duplicates === 1 && codeArray.indexOf(elements.mineral) === -1) {
@@ -85,97 +93,13 @@ const fullElementalCode = (year, horoscope) => {
     }
 
     // Galactic: TODO
-    codeArray.push(galactic)
-    
+    codeArray.push(galacticElement)
+
 
     return linearCode(codeArray)
 }
 
-const mapHoroscopeToChart = (horoscope) => {
-
-    var data = {
-        "planets": {},
-        "cusps": []
-    }
-
-
-    // Points (northnode, southnode, lilith)
-    data.planets["Lilith"] = [parseInt(horoscope.CelestialPoints.lilith.ChartPosition.Horizon.DecimalDegrees)]
-    data.planets["NNode"] = [parseInt(horoscope.CelestialPoints.northnode.ChartPosition.Horizon.DecimalDegrees)]
-
-
-    // Celestial Bodies
-    const bodies = horoscope.CelestialBodies
-    data.planets["Chiron"] = [parseInt(bodies.chiron.ChartPosition.Horizon.DecimalDegrees)]
-    data.planets["Pluto"] = [parseInt(bodies.pluto.ChartPosition.Horizon.DecimalDegrees)]
-    data.planets["Neptune"] = [parseInt(bodies.neptune.ChartPosition.Horizon.DecimalDegrees)]
-    data.planets["Uranus"] = [parseInt(bodies.uranus.ChartPosition.Horizon.DecimalDegrees)]
-    data.planets["Saturn"] = [parseInt(bodies.saturn.ChartPosition.Horizon.DecimalDegrees)]
-    data.planets["Jupiter"] = [parseInt(bodies.jupiter.ChartPosition.Horizon.DecimalDegrees)]
-    data.planets["Mars"] = [parseInt(bodies.mars.ChartPosition.Horizon.DecimalDegrees)]
-    data.planets["Moon"] = [parseInt(bodies.moon.ChartPosition.Horizon.DecimalDegrees)]
-    data.planets["Sun"] = [parseInt(bodies.sun.ChartPosition.Horizon.DecimalDegrees)]
-    data.planets["Mercury"] = [parseInt(bodies.mercury.ChartPosition.Horizon.DecimalDegrees)]
-    data.planets["Venus"] = [parseInt(bodies.venus.ChartPosition.Horizon.DecimalDegrees)]
-
-
-    const angles = horoscope.Angles
-    const ascendant = parseInt(angles.ascendant.ChartPosition.Ecliptic.DecimalDegrees)	
-
-    // Cusps
-    var cusps = []
-    horoscope.ZodiacCusps.forEach(cusp => {
-        // console.log(cusp.Sign.key, ' cusp start: ', cusp.Sign.zodiacStart)
-        cusps.push(cusp.Sign.zodiacStart)
-    })
-
-    data.cusps = cusps
-
-    // console.log('data: ', data)
-
-    return data
-
-    const targetData = {
-        "planets":{
-            "Lilith":[18],
-            "Chiron":[18],
-            "Pluto":[63],
-            "Neptune":[110, 0.2],
-            "Uranus":[318],
-            "Saturn":[201, -0.2],
-            "Jupiter":[192],
-            "Mars":[210],
-            "Moon":[268],
-            "Sun":[281],
-            "Mercury":[312],
-            "Venus":[330],
-            "NNode":[2]},
-        "cusps":[296, 350, 30, 56, 75, 94, 116, 170, 210, 236, 255, 274]			
-    }
-}
-
-const checkForDegreeOverflow = (deg) => {
-    if (deg < 360 && deg >= 0) {
-        return deg
-    } else if (deg > 360) {
-        return deg - 360
-    } else if (deg < 0) {
-        return deg + 360
-    }
-}
-
-const firstChar = (string) => {
-    return string.charAt(0).toUpperCase()
-}
-
-const linearCode = (codeArray) => {
-    return `${firstChar(codeArray[0])}-${firstChar(codeArray[1])}-${firstChar(codeArray[2])}-${firstChar(codeArray[3])}-${firstChar(codeArray[4])} --- ${firstChar(codeArray[0])}-${firstChar(codeArray[1])}-${firstChar(codeArray[4])}-${firstChar(codeArray[3])}-${firstChar(codeArray[2])}`
-}
-
- // TODO: Add chart functions
-
 module.exports = {
     dagaraElement,
-    fullElementalCode,
-    mapHoroscopeToChart
+    fullElementalCode
 }
