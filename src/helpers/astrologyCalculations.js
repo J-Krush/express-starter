@@ -1,6 +1,7 @@
 const fetch = require('node-fetch')
 const { requestPromise } = require('../helpers/network')
 const { celestialBodies, signPositions } = require('../constants/astrologicalConstants')
+const { checkForDegreeOverflow } = require('./utilities')
 
 // Constants 
 // Sound info found here: https://en.wikipedia.org/wiki/Ascendant
@@ -54,7 +55,8 @@ const getNatalChart = async (dateTime, lat, lon) => {
 
     return {
         ...planetaryPositions,
-        northNode
+        northNode,
+        southNode: northNode + 180
     }
 
 }
@@ -94,7 +96,7 @@ const getPlanetaryData = async (year, month, day, hour, minute, lat, lon) => {
                 positions.ascendant = ascendant
             }
 
-            const ecLon = parseForEclipcticLongitude(response, hour, minute)
+            const ecLon = parseForEclipticLongitude(response, hour, minute)
 
             // Corrects for ascendant rotation and true sidereal offset
             positions[key] = ecLon - trueSiderealOffset// positions.ascendant + trueSiderealOffset - ecLon
@@ -124,8 +126,6 @@ const getLunarNodeData = async (year, month, day, hour, minute, lat, lon) => {
     const data = await response.json()
 
     const ascendingNode = parseForAscendingNode(data.result) - trueSiderealOffset
-
-    console.log('ascending node: ', ascendingNode)
     
     return ascendingNode
 }
@@ -197,7 +197,7 @@ const getAscendantDegrees = (nasaBody, hour, minute, lat) => {
     return ascendantDegrees
 }
 
-const parseForEclipcticLongitude = (nasaBody, hour, minute) => {
+const parseForEclipticLongitude = (nasaBody, hour, minute) => {
     // console.log('string to find: ', `${getDoubleDigitNumber(hour)}:${getDoubleDigitNumber(minute)} *`)
 
     // Getting observer ecliptic longitude
@@ -231,11 +231,7 @@ const getDoubleDigitNumber = (number) => {
 
 const whichSignAndDegree = (bodyPosition) => {
 
-    var position = bodyPosition
-
-    if (position > 360) { position = position - 360 }
-
-    if (position < 0) { position = position + 360 }
+    const position = checkForDegreeOverflow(bodyPosition)
 
     const zodiacs = Object.keys(signPositions)
     
@@ -261,7 +257,7 @@ const whichSignAndDegree = (bodyPosition) => {
 module.exports = {
     getNatalChart,
     getAscendantDegrees,
-    parseForEclipcticLongitude,
+    parseForEclipticLongitude,
     whichSignAndDegree
 }
 
