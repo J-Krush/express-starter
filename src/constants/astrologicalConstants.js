@@ -7,37 +7,23 @@ const elements = {
     air: 'air',
     nature: 'nature'
 }
-const signElement = {
-    aries: elements.fire,
-    taurus: elements.earth,
-    gemini: elements.air,
-    cancer: elements.water,
-    leo: elements.fire,
-    virgo: elements.earth,
-    libra: elements.air,
-    scorpio: elements.water,
-    sagittarius: elements.fire,
-    capricorn: elements.earth,
-    aquarius: elements.air,
-    pisces: elements.water,
-    ophiuchus: 'Ophiuchus', // TODO: what is ophiuchus element?
+
+const zodiacSigns = {
+    aries: { start: 0.0, width: 21.0, element: elements.fire },
+    taurus: { start: 21.0, width: 36.5, element: elements.earth },
+    gemini: { start: 57.5, width: 25.25, element: elements.air },
+    cancer: { start: 82.75, width: 20.25, element: elements.water },
+    leo: { start: 103.0, width: 38.25, element: elements.fire },
+    virgo: { start: 141.25, width: 49.75, element: elements.earth },
+    libra: { start: 191.0, width: 19, element: elements.air },
+    scorpio: { start: 210.0, width: 13.5, element: elements.water },
+    ophiuchus: { start: 223.5, width: 12.5, element: elements.nature },
+    sagittarius: { start: 236.0, width: 33, element: elements.fire },
+    capricorn: { start: 269.0, width: 25.5, element: elements.earth },
+    aquarius: { start: 294.5, width: 23.5, element: elements.air },
+    pisces: { start: 318.0, width: 42, element: elements.water },
 }
-const signPositions = {
-    aries: 0.0,
-    taurus: 21.0,
-    gemini: 57.5,
-    cancer: 82.75,
-    leo: 103.0,
-    virgo: 141.25,
-    libra: 191.0,
-    scorpio: 210.0,
-    ophiuchus: 223.5,
-    sagittarius: 236.0,
-    capricorn: 269.0,
-    aquarius: 294.5,
-    pisces: 318.0,
-    
-}
+
 const celestialBodies = {
     sun: {title: 'Sun', code: 10},
 	moon: {title: 'Moon', code: 301},
@@ -57,7 +43,6 @@ const celestialBodies = {
 
 module.exports = {
     elements,
-    signElement,
-    signPositions,
+    zodiacSigns,
     celestialBodies
 }
