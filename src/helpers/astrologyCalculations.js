@@ -1,12 +1,13 @@
 const fetch = require('node-fetch')
 const { requestPromise } = require('../helpers/network')
-const { celestialBodies, signPositions } = require('../constants/astrologicalConstants')
-const { checkForDegreeOverflow } = require('./utilities')
+const { celestialBodies, zodiacSigns } = require('../constants/astrologicalConstants')
+const { checkForDegreeOverflow, getTwoDecimalNumber } = require('./utilities')
 
 // Constants 
 // Sound info found here: https://en.wikipedia.org/wiki/Ascendant
 const earthInclination = 23.4392911 // deg
 const trueSiderealOffset = 31.5 // deg
+const cuspThreshold = 0.10 // 10%
 
 // Horizons API 
 const nasaUrl = 'https://ssd.jpl.nasa.gov/api/horizons.api?format=json'
@@ -174,8 +175,6 @@ const getAscendantDegrees = (nasaBody, hour, minute, lat) => {
 
     var ascendantDegrees = ascendantRadians * (180 / Math.PI )
 
-    console.log('ascendant degrees: ', ascendantDegrees)
-
     // Ascendant quadrant rules
     if (x < 0) {
         ascendantDegrees = ascendantDegrees + 180
@@ -191,8 +190,6 @@ const getAscendantDegrees = (nasaBody, hour, minute, lat) => {
 
     // Converting to true sidereal zodiac
     ascendantDegrees = ascendantDegrees - trueSiderealOffset
-
-    console.log('ascendant degrees: ', ascendantDegrees)
 
     return ascendantDegrees
 }
@@ -230,26 +227,49 @@ const getDoubleDigitNumber = (number) => {
 }
 
 const whichSignAndDegree = (bodyPosition) => {
+    // Given a body position in degrees from Aries, which sign is the body in, to what degree, and is it cusping?
 
     const position = checkForDegreeOverflow(bodyPosition)
 
-    const zodiacs = Object.keys(signPositions)
+    // Get all zodiac keys from dict
+    const zodiacs = Object.keys(zodiacSigns)
     
+    // Loop through zodiacs, determine which sign the body is in
     for (let i = 0; i < zodiacs.length; i++) {  
         const zodiac1 = zodiacs[i]
-        const zodiacPosition1 = signPositions[zodiac1]
+        const zodiacPosition1 = zodiacSigns[zodiac1].start
 
         var zodiacPosition2
         if (i !== zodiacs.length - 1) {
             const zodiac2 = zodiacs[i + 1]
-            zodiacPosition2 = signPositions[zodiac2]
+            zodiacPosition2 = zodiacSigns[zodiac2].start
         } else {
             const zodiac2 = zodiacs[0]
-            zodiacPosition2 = signPositions[zodiac2] + 360
+            zodiacPosition2 = zodiacSigns[zodiac2].start + 360
+        }
+
+        // To what degree is the body in the zodiac sign
+        const degree = position - zodiacPosition1
+
+        var cusp = {}
+
+        if (degree/zodiacSigns[zodiac1].width <= cuspThreshold) {
+            // If degree is < 10%, cusp is previous zodiac sign
+            cusp = {
+                ratio: getTwoDecimalNumber(degree/zodiacSigns[zodiac1].width),
+                zodiac: i !== 0 ? zodiacs[i - 1] : zodiacs[12],
+            }
+        } else if (degree/zodiacSigns[zodiac1].width >= 1 - cuspThreshold) {
+            // If degree is > 90%, cusp is next zodiac sign
+            cusp = {
+                ratio: getTwoDecimalNumber(degree/zodiacSigns[zodiac1].width),
+                zodiac: i !== 12 ? zodiacs[i + 1] : zodiacs[0],
+            }
         }
 
         if (position >= zodiacPosition1 && position < zodiacPosition2) {
-            return { sign: zodiac1, degree: position - zodiacPosition1 }
+            // console.log('degree: ', degree, ' width: ', zodiacSigns[zodiac1].width, ' , cuspRatio: ', cuspRatio)
+            return { sign: zodiac1, degree: getTwoDecimalNumber(degree), cusp }
         } 
     }
 }
