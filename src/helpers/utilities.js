@@ -17,8 +17,13 @@ const linearCode = (codeArray) => {
     return `${firstChar(codeArray[0])}-${firstChar(codeArray[1])}-${firstChar(codeArray[2])}-${firstChar(codeArray[3])}-${firstChar(codeArray[4])} --- ${firstChar(codeArray[0])}-${firstChar(codeArray[1])}-${firstChar(codeArray[4])}-${firstChar(codeArray[3])}-${firstChar(codeArray[2])}`
 }
 
+const getTwoDecimalNumber = (number) => {
+    return Math.round(number * 100) / 100
+}
+
 module.exports = {
     checkForDegreeOverflow,
     firstChar,
-    linearCode
+    linearCode,
+    getTwoDecimalNumber
 }

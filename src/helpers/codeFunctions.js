@@ -1,4 +1,4 @@
-const { elements, signElement } = require('../constants/astrologicalConstants')
+const { elements, zodiacSigns } = require('../constants/astrologicalConstants')
 const { linearCode } = require('./utilities')
 
 const dagaraElement = (year) => {
@@ -49,10 +49,10 @@ const fullElementalCode = (year, sunSign, nNode, sNode) => {
 
     const indigeniousElement = dagaraElement(year)
 
-    const sunSignElement = signElement[sunSign]
-    const southNodeElement = signElement[sNode]
+    const sunSignElement = zodiacSigns[sunSign.sign].element
+    const southNodeElement = zodiacSigns[sNode.sign].element
     const legacyElement = '?'
-    const northNodeElement = signElement[nNode]
+    const northNodeElement = zodiacSigns[nNode.sign].element
     const galacticElement = '?'
 
     const rawArray = [indigeniousElement, sunSignElement, southNodeElement, legacyElement, northNodeElement, galacticElement]

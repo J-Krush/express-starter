@@ -13,7 +13,8 @@ const { getNatalChart, whichSignAndDegree } = require('./helpers/astrologyCalcul
 const { generatePDF, writeTempHTML } = require('./helpers/generatePDF')
 
 // Constants
-const { fullElementalCode, mapHoroscopeToChart } = require('./helpers/codeFunctions')
+const { fullElementalCode } = require('./helpers/codeFunctions')
+const { getTwoDecimalNumber } = require('./helpers/utilities')
 
 
 // Load environment variables from .env
@@ -58,10 +59,20 @@ app.post('/elemental-code', async function (req, res) {
 
         if (key === 'ascendant') continue
 
-        const { sign, degree } = whichSignAndDegree(position)
+        const { sign, degree, cusp } = whichSignAndDegree(position)
 
-        console.log(key, ' (', position, ') is in ', sign, ', degree: ', degree)
+        console.log(key, ' (', getTwoDecimalNumber(position), ') is in ', sign, ', degree: ', getTwoDecimalNumber(degree), ' , cusp? ', cusp)
     }
+
+    const elementalCode = fullElementalCode(
+        dateTime.year,
+        whichSignAndDegree(planetaryPositions.sun),
+        whichSignAndDegree(planetaryPositions.northNode),
+        whichSignAndDegree(planetaryPositions.southNode)
+    )
+
+    console.log('elemental code: ', elementalCode)
+
 
     res.sendStatus(200)
 })
