@@ -22,7 +22,7 @@ const signElement = {
     pisces: elements.water,
     ophiuchus: 'Ophiuchus', // TODO: what is ophiuchus element?
 }
-const signPosition = {
+const signPositions = {
     aries: 0.0,
     taurus: 21.0,
     gemini: 57.5,
@@ -58,6 +58,6 @@ const celestialBodies = {
 module.exports = {
     elements,
     signElement,
-    signPosition,
+    signPositions,
     celestialBodies
 }

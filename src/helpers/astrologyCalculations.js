@@ -1,6 +1,6 @@
 const fetch = require('node-fetch')
 const { requestPromise } = require('../helpers/network')
-const { celestialBodies } = require('../constants/astrologicalConstants')
+const { celestialBodies, signPositions } = require('../constants/astrologicalConstants')
 
 // Constants 
 // Sound info found here: https://en.wikipedia.org/wiki/Ascendant
@@ -45,14 +45,17 @@ const getNatalChart = async (dateTime, lat, lon) => {
     // Request data from nasa horizons API
     const planetaryPositions = await getPlanetaryData(year, month, day, utcHour, minute, lat, lon)
     const lunarNode = await getLunarNodeData(year, month, day, utcHour, minute, lat, lon)
-    const northNode = planetaryPositions.ascendant + trueSiderealOffset - lunarNode
+    const northNode = lunarNode
 
-    console.log('planetaryPositions: ', planetaryPositions)
-    console.log('northNode: ', northNode)
+    // console.log('planetaryPositions: ', planetaryPositions)
+    // console.log('northNode: ', northNode)
 
     // console.log('cleanedData: ', cleanedData)
 
-    return {}
+    return {
+        ...planetaryPositions,
+        northNode
+    }
 
 }
 
@@ -120,7 +123,9 @@ const getLunarNodeData = async (year, month, day, hour, minute, lat, lon) => {
     const response = await fetch(nasaUrl + arguments)
     const data = await response.json()
 
-    const ascendingNode = parseForAscendingNode(data.result)
+    const ascendingNode = parseForAscendingNode(data.result) - trueSiderealOffset
+
+    console.log('ascending node: ', ascendingNode)
     
     return ascendingNode
 }
@@ -129,17 +134,17 @@ const getAscendantDegrees = (nasaBody, hour, minute, lat) => {
     // Uses ecliptic geocentric longitude calculation defined here:
     // https://en.wikipedia.org/wiki/Ascendant#Calculation
 
-    console.log('nasabody: ', nasaBody)
+    // console.log('nasabody: ', nasaBody)
 
-    console.log('string to search: ', `${getDoubleDigitNumber(hour)}:${getDoubleDigitNumber(minute)} *`)
+    // console.log('string to search: ', `${getDoubleDigitNumber(hour)}:${getDoubleDigitNumber(minute)} *`)
     const index = nasaBody.indexOf(`${getDoubleDigitNumber(hour)}:${getDoubleDigitNumber(minute)} *`)
 
-    console.log('index: ', index)
+    // console.log('index: ', index)
 
     // Getting local sidereal time from nasa api
     let siderealTime = nasaBody.substring(index + 10, index + 18)
 
-    console.log('siderealTime: ', siderealTime)
+    // console.log('siderealTime: ', siderealTime)
 
     const siderealHour = (Number(siderealTime.substring(0, 2)) / 24) * 360
     const siderealMinute = (Number(siderealTime.substring(3, 5)) / 60) * 15
@@ -151,7 +156,7 @@ const getAscendantDegrees = (nasaBody, hour, minute, lat) => {
 
     const siderealTimeDegrees = siderealHour + siderealMinute + siderealSecond
 
-    console.log('siderealTimeDegrees: ', siderealTimeDegrees)
+    // console.log('siderealTimeDegrees: ', siderealTimeDegrees)
 
     const siderealTimeRadians = siderealTimeDegrees * (Math.PI / 180)
 
@@ -224,10 +229,40 @@ const getDoubleDigitNumber = (number) => {
     }
 }
 
+const whichSignAndDegree = (bodyPosition) => {
+
+    var position = bodyPosition
+
+    if (position > 360) { position = position - 360 }
+
+    if (position < 0) { position = position + 360 }
+
+    const zodiacs = Object.keys(signPositions)
+    
+    for (let i = 0; i < zodiacs.length; i++) {  
+        const zodiac1 = zodiacs[i]
+        const zodiacPosition1 = signPositions[zodiac1]
+
+        var zodiacPosition2
+        if (i !== zodiacs.length - 1) {
+            const zodiac2 = zodiacs[i + 1]
+            zodiacPosition2 = signPositions[zodiac2]
+        } else {
+            const zodiac2 = zodiacs[0]
+            zodiacPosition2 = signPositions[zodiac2] + 360
+        }
+
+        if (position >= zodiacPosition1 && position < zodiacPosition2) {
+            return { sign: zodiac1, degree: position - zodiacPosition1 }
+        } 
+    }
+}
+
 module.exports = {
     getNatalChart,
     getAscendantDegrees,
-    parseForEclipcticLongitude
+    parseForEclipcticLongitude,
+    whichSignAndDegree
 }
 
 

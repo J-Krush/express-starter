@@ -7,7 +7,7 @@ const { Origin, Horoscope } = require('circular-natal-horoscope-js')
 // TODO: Add rate limiter: https://www.npmjs.com/package/express-rate-limit
 
 // Planetary calculations
-const { getNatalChart } = require('./helpers/astrologyCalculations')
+const { getNatalChart, whichSignAndDegree } = require('./helpers/astrologyCalculations')
 
 // PDF
 const { generatePDF, writeTempHTML } = require('./helpers/generatePDF')
@@ -46,9 +46,22 @@ app.post('/elemental-code', async function (req, res) {
     const dateTimeString = req.body.dateTime
     const dateTime = DateTime.fromISO(dateTimeString)
 
-    console.log('dateTime: ', dateTime)
+    // console.log('dateTime: ', dateTime)
 
-    await getNatalChart(dateTime, lat, lon)
+    const planetaryPositions = await getNatalChart(dateTime, lat, lon)
+
+    const bodies = Object.keys(planetaryPositions)
+
+    for (let i = 0; i < bodies.length; i++) {  
+        const key = bodies[i]
+        const position = planetaryPositions[key]
+
+        if (key === 'ascendant') continue
+
+        const { sign, degree } = whichSignAndDegree(position)
+
+        console.log(key, ' (', position, ') is in ', sign, ', degree: ', degree)
+    }
 
     res.sendStatus(200)
 })
