@@ -70,11 +70,16 @@ app.post('/elemental-code', async function (req, res) {
         whichSignAndDegree(planetaryPositions.northNode),
         whichSignAndDegree(planetaryPositions.southNode)
     )
-
+    
+    console.log('==============================================')
+    console.log('')
     console.log('elemental code: ', elementalCode)
+    console.log('')
+    console.log('==============================================')
 
+    // res.sendStatus(200)
 
-    res.sendStatus(200)
+    res.send(elementalCode)
 })
 
 // TODO: Add email endpoint. The above should return the data in the response (including the chart). 

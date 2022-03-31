@@ -251,25 +251,25 @@ const whichSignAndDegree = (bodyPosition) => {
         // To what degree is the body in the zodiac sign
         const degree = position - zodiacPosition1
 
-        var cusp = {}
-
-        if (degree/zodiacSigns[zodiac1].width <= cuspThreshold) {
-            // If degree is < 10%, cusp is previous zodiac sign
-            cusp = {
-                ratio: getTwoDecimalNumber(degree/zodiacSigns[zodiac1].width),
-                zodiac: i !== 0 ? zodiacs[i - 1] : zodiacs[12],
-            }
-        } else if (degree/zodiacSigns[zodiac1].width >= 1 - cuspThreshold) {
-            // If degree is > 90%, cusp is next zodiac sign
-            cusp = {
-                ratio: getTwoDecimalNumber(degree/zodiacSigns[zodiac1].width),
-                zodiac: i !== 12 ? zodiacs[i + 1] : zodiacs[0],
-            }
-        }
-
         if (position >= zodiacPosition1 && position < zodiacPosition2) {
+
+            var cusp = false
+            if (degree/zodiacSigns[zodiac1].width <= cuspThreshold) {
+                // If degree is < 10%, cusp is previous zodiac sign
+                cusp = {
+                    ratio: getTwoDecimalNumber(degree/zodiacSigns[zodiac1].width),
+                    zodiac: i !== 0 ? zodiacs[i - 1] : zodiacs[12],
+                }
+            } else if (degree/zodiacSigns[zodiac1].width >= 1 - cuspThreshold) {
+                // If degree is > 90%, cusp is next zodiac sign
+                cusp = {
+                    ratio: getTwoDecimalNumber(degree/zodiacSigns[zodiac1].width),
+                    zodiac: i !== 12 ? zodiacs[i + 1] : zodiacs[0],
+                }
+            }
+
             // console.log('degree: ', degree, ' width: ', zodiacSigns[zodiac1].width, ' , cuspRatio: ', cuspRatio)
-            return { sign: zodiac1, degree: getTwoDecimalNumber(degree), cusp }
+            return { sign: zodiac1, element: zodiacSigns[zodiac1].element, degree: getTwoDecimalNumber(degree), cusp }
         } 
     }
 }
