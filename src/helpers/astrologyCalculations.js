@@ -82,6 +82,9 @@ const getPlanetaryData = async (year, month, day, hour, minute, lat, lon) => {
 
         if (typeof body.code !== "number" || body.title === 'Earth') continue
 
+        // TODO: Comment this out for full planets. Elemental code only needs sun sign.
+        if (body.title !== 'Sun') continue
+
         // console.log(`${key}: ${body.code}`)
         const command = `&COMMAND='${body.code}'`
 
