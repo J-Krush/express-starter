@@ -1,0 +1,9 @@
+[build]
+  command = "npm run bundle && npm run build"
+  functions = "/netlify/functions"
+  publish = "build"
+
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/graphql"
+  status = 200
