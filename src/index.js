@@ -29,11 +29,9 @@ app.use(bodyParser.urlencoded({ extended: true }))
 
 app.post('/elemental-code', async function (req, res) {
 
-    console.log('req: ', req)
-    console.log('body: ', req.body)
-
+    console.log('query params: ', req.query)
     // Check for body and arguments
-    if (!req.body || !req.body.lat || !req.body.lon || !req.body.dateTime) {
+    if (!req.query || !req.query.lat || !req.query.lon || !req.query.dateTime) {
         res.send({
             message: "Missing arguments",
             code: 422,
