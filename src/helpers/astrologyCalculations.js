@@ -20,11 +20,17 @@ const getTimeZone = async (dateTime, lat, lon) => {
     const args = `location=${lat}%2C${lon}&timestamp=${dateTime.toSeconds()}&key=${process.env.GCP_API_KEY}`
     url = url + args
 
-    const response = await fetch(url)
-    const data = await response.json()
+    var timeZoneOffset = 0
+    try {
+        const response = await fetch(url)
+        const data = await response.json()
 
-    const timeZoneOffset = Math.floor((data.dstOffset + data.rawOffset) / 3600)
+        timeZoneOffset = Math.floor((data.dstOffset + data.rawOffset) / 3600)
 
+    } catch (e) {
+        console.log('Google Time Zone Error Occurred', e)
+    }
+    
     return timeZoneOffset
 }
 
