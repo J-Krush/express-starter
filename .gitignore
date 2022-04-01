@@ -5,7 +5,7 @@ node_modules
 .env
 
 # production
-/build
+# /build
 
 # certs
 /certificates
@@ -15,9 +15,6 @@ node_modules
 
 # Serverless function bundle
 /netlify/functions/elemental-code/bundle
-
-# production
-/build
 
 # temp folder
 /src/temp
