@@ -5,5 +5,5 @@
 
 [[redirects]]
   from = "/*"
-  to = "/.netlify/functions/graphql"
+  to = "/netlify/functions/elemental-code"
   status = 200
