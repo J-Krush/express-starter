@@ -3,14 +3,13 @@ const dotenv = require('dotenv')
 const bodyParser = require('body-parser')
 const { DateTime } = require('luxon')
 const fetch = require('node-fetch')
-const { Origin, Horoscope } = require('circular-natal-horoscope-js')
 // TODO: Add rate limiter: https://www.npmjs.com/package/express-rate-limit
 
 // Planetary calculations
 const { getNatalChart, whichSignAndDegree } = require('./helpers/astrologyCalculations')
 
 // PDF
-const { generatePDF, writeTempHTML } = require('./helpers/generatePDF')
+// const { generatePDF, writeTempHTML } = require('./helpers/generatePDF')
 
 // Constants
 const { fullElementalCode } = require('./helpers/codeFunctions')
