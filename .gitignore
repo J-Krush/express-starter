@@ -13,6 +13,12 @@ node_modules
 # Local Netlify folder
 .netlify
 
+# Serverless function bundle
+/netlify/functions/elemental-code/bundle
+
+# production
+/build
+
 # temp folder
 /src/temp
 
@@ -21,3 +27,7 @@ node_modules
 /src/helpers/astrochart.min.js
 /src/helpers/mtz-jk-return-planet-positions.json
 /src/helpers/mtz-jk-return.html
+src/constants/mtz.js
+
+# scratch folder
+/scratch/
