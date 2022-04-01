@@ -88,10 +88,10 @@ const getPlanetaryData = async (year, month, day, hour, minute, lat, lon) => {
         // console.log(`${key}: ${body.code}`)
         const command = `&COMMAND='${body.code}'`
 
-        const arguments = args + command + coordinates + startTime + stopTime
+        const allArguments = args + command + coordinates + startTime + stopTime
 
         try {
-            const response = await requestPromise(nasaUrl + arguments)
+            const response = await requestPromise(nasaUrl + allArguments)
             // console.log('response: ', response)
 
             if (i === 0) { 
@@ -124,9 +124,9 @@ const getLunarNodeData = async (year, month, day, hour, minute, lat, lon) => {
     const stopTime = `&STOP_TIME='${year}-${getDoubleDigitNumber(month)}-${getDoubleDigitNumber(day)} ${getDoubleDigitNumber(hour)}:${getDoubleDigitNumber(minute + 1)}'`
     const otherArgs = "&STEP_SIZE='1 MINUTES'&REF_SYSTEM='ICRF'&REF_PLANE='ECLIPTIC'&OUT_UNITS='KM-S'&ELM_LABELS='YES'&TP_TYPE='ABSOLUTE'&CSV_FORMAT='NO'&OBJ_DATA='YES'"
 
-    const arguments = args + coordinates + startTime + stopTime + otherArgs
+    const allArguments = args + coordinates + startTime + stopTime + otherArgs
 
-    const response = await fetch(nasaUrl + arguments)
+    const response = await fetch(nasaUrl + allArguments)
     const data = await response.json()
 
     const ascendingNode = parseForAscendingNode(data.result) - trueSiderealOffset

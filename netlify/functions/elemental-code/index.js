@@ -3,6 +3,6 @@
 
 const serverless = require('serverless-http')
 
-const { app } = require("./bundle/server")
+const { app } = require("./bundle")
 
 module.exports.handler = serverless(app)
