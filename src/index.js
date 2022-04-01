@@ -29,6 +29,7 @@ app.use(bodyParser.urlencoded({ extended: true }))
 
 app.post('/elemental-code', async function (req, res) {
 
+    console.log('req: ', req)
     console.log('body: ', req.body)
 
     // Check for body and arguments
