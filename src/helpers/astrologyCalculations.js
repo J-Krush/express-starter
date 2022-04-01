@@ -275,6 +275,8 @@ const whichSignAndDegree = (bodyPosition) => {
             return { sign: zodiac1, element: zodiacSigns[zodiac1].element, degree: getTwoDecimalNumber(degree), cusp }
         } 
     }
+
+    return { sign: '', element: '', degree: 0.0, cusp: false}
 }
 
 module.exports = {
