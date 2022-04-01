@@ -28,7 +28,8 @@
     "node-fetch": "^2.6.7",
     "puppeteer": "^13.3.2",
     "request": "^2.88.2",
-    "serverless-http": "^2.7.0"
+    "serverless-http": "^2.7.0",
+    "shx": "^0.3.4"
   },
   "devDependencies": {
     "@babel/cli": "^7.17.6",
