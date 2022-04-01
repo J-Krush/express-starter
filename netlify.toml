@@ -5,5 +5,5 @@
 
 [[redirects]]
   from = "/elemental-code"
-  to = "/.netlify/functions/elemental-code"
+  to = "/netlify/functions/elemental-code"
   status = 200
