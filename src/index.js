@@ -30,7 +30,8 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.post('/elemental-code', async function (req, res) {
 
     console.log('query params: ', req.query)
-    // Check for body and arguments
+
+    // Check for query params
     if (!req.query || !req.query.lat || !req.query.lon || !req.query.dateTime) {
         res.send({
             message: "Missing arguments",
@@ -41,10 +42,10 @@ app.post('/elemental-code', async function (req, res) {
     }
 
     // Parse for arguments
-    const lat = Number(req.body.lat)
-    const lon = Number(req.body.lon)
+    const lat = Number(req.query.lat)
+    const lon = Number(req.query.lon)
 
-    const dateTimeString = req.body.dateTime
+    const dateTimeString = req.query.dateTime
     const dateTime = DateTime.fromISO(dateTimeString)
 
     // console.log('dateTime: ', dateTime)
