@@ -41,8 +41,8 @@ app.post('/elemental-code', async function (req, res) {
     }
 
     // Parse for arguments
-    const lat = req.body.lat
-    const lon = req.body.lon
+    const lat = Number(req.body.lat)
+    const lon = Number(req.body.lon)
 
     const dateTimeString = req.body.dateTime
     const dateTime = DateTime.fromISO(dateTimeString)
