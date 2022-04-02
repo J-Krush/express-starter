@@ -20,6 +20,8 @@ const getTimeZone = async (dateTime, lat, lon) => {
     const args = `location=${lat}%2C${lon}&timestamp=${dateTime.toSeconds()}&key=${process.env.GCP_API_KEY}`
     url = url + args
 
+    console.log('time zone url: ', url)
+
     var timeZoneOffset = 0
     try {
         const response = await fetch(url)
