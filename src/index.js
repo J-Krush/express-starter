@@ -48,7 +48,9 @@ app.post('/elemental-code', async function (req, res) {
     const dateTimeString = req.query.dateTime
     const dateTime = DateTime.fromISO(dateTimeString)
 
-    // console.log('dateTime: ', dateTime)
+    console.log('dateTime: ', dateTime)
+    console.log('lat: ', lat)
+    console.log('lon: ', lon)
 
     const planetaryPositions = await getNatalChart(dateTime, lat, lon)
 
