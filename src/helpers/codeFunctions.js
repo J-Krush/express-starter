@@ -82,6 +82,8 @@ const fullElementalCode = (year, sunSign, northNode, southNode) => {
     // Soul Path (South Node)
     if (southNode.element !== indigenious.element && southNode.element !== sunSign.element && southNode.cusp === false) {
         codeArray.push(southNode)
+    } else if (southNode.element === sunSign.element && sunSign.cusp !== false) {
+        codeArray.push(southNode)
     } else if (southNode.element === indigenious.element && southNode.element === sunSign.element) {
         codeArray.push({
             ...southNode,
@@ -90,6 +92,7 @@ const fullElementalCode = (year, sunSign, northNode, southNode) => {
     }  else  {
         const mineralCount = elementCountInArray(codeArray, elements.mineral)
         const natureCount = elementCountInArray(codeArray, elements.nature)
+
         if (mineralCount === 0) {
             codeArray.push({
                 ...southNode,
