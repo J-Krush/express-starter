@@ -62,80 +62,16 @@ const fullElementalCode = (year, sunSign, northNode, southNode) => {
     var codeArray = [indigenious]
 
     // Achievement (Sun Sign)
-    if (sunSign.element !== indigenious.element && sunSign.cusp === false) {
-        codeArray.push(sunSign)
-    } else {
-        const mineralCount = elementCountInArray(codeArray, elements.mineral)
-        if (mineralCount === 0) {
-            codeArray.push({
-                ...sunSign,
-                element: elements.mineral
-            })
-        } else {
-            codeArray.push({
-                ...sunSign,
-                element: elements.nature
-            })
-        }
-    }
+    codeArray.push(determineFinalElement(codeArray, sunSign))
 
     // Soul Path (South Node)
-    if (southNode.element !== indigenious.element && southNode.element !== sunSign.element && southNode.cusp === false) {
-        codeArray.push(southNode)
-    } else if (southNode.element === sunSign.element && sunSign.cusp !== false) {
-        codeArray.push(southNode)
-    } else if (southNode.element === indigenious.element && southNode.element === sunSign.element) {
-        codeArray.push({
-            ...southNode,
-            element: elements.nature
-        })
-    }  else  {
-        const mineralCount = elementCountInArray(codeArray, elements.mineral)
-        const natureCount = elementCountInArray(codeArray, elements.nature)
-
-        if (mineralCount === 0) {
-            codeArray.push({
-                ...southNode,
-                element: elements.mineral
-            })
-        } else if (mineralCount !== 0 && natureCount !== 0) {
-            codeArray.push(southNode)
-        } else {
-            codeArray.push({
-                ...southNode,
-                element: elements.nature
-            })
-        }
-    }
+    codeArray.push(determineFinalElement(codeArray, southNode))
 
     // Legacy: TODO
     codeArray.push(legacyElement)
 
     // Multidimensional
-    if (northNode.element !== indigenious.element && northNode.element !== sunSign.element && northNode.element !== southNode.element && northNode.cusp === false) {
-        codeArray.push(northNode)
-    } else if (northNode.element === indigenious.element && northNode.element === sunSign.element) {
-        codeArray.push({
-            ...northNode,
-            element: elements.nature
-        })
-    }  else {
-        const mineralCount = elementCountInArray(codeArray, elements.mineral)
-        const natureCount = elementCountInArray(codeArray, elements.nature)
-        if (mineralCount === 0) {
-            codeArray.push({
-                ...northNode,
-                element: elements.mineral
-            })
-        } else if (mineralCount !== 0 && natureCount !== 0) {
-            codeArray.push(northNode)
-        } else {
-            codeArray.push({
-                ...northNode,
-                element: elements.nature
-            })
-        }
-    }
+    codeArray.push(determineFinalElement(codeArray, northNode))
 
     // Galactic: TODO
     codeArray.push(galacticElement)
@@ -145,6 +81,57 @@ const fullElementalCode = (year, sunSign, northNode, southNode) => {
     // console.log('raw array: ', linearCode(rawArray))
     // console.log('filtered array: ', linearCode(codeArray, year))
     return `${linearCode(codeArray, year)} (${linearCode(rawArray, 0, true)})`
+}
+
+const determineFinalElement = (codeArray, nextSign) => {
+
+    if (nextSign.cusp !== false) {
+        // Mineral or Nature
+        const mineralCount = elementCountInArray(codeArray, elements.mineral)
+        const natureCount = elementCountInArray(codeArray, elements.nature)
+
+        if (mineralCount === 0) {
+            return {
+                ...nextSign,
+                element: elements.mineral
+            }
+        } else if (mineralCount !== 0 && natureCount !== 0) {
+            return nextSign
+        } else {
+            // mineralCount === 1
+            return {
+                ...nextSign,
+                element: elements.nature
+            }
+        }
+
+    } else {
+        // Not a cusp
+        const nextSignElementCount = elementCountInArray(codeArray, nextSign.element)
+        if (nextSignElementCount === 0) {
+            return nextSign
+        } else {
+            const mineralCount = elementCountInArray(codeArray, elements.mineral)
+            const natureCount = elementCountInArray(codeArray, elements.nature)
+
+            if (mineralCount === 0) {
+                return {
+                    ...nextSign,
+                    element: elements.mineral
+                }
+            } else if (mineralCount !== 0 && natureCount !== 0) {
+                return nextSign
+            } else {
+                // mineralCount === 1
+                return {
+                    ...nextSign,
+                    element: elements.nature
+                }
+            }
+        }
+    }
+
+
 }
 
 module.exports = {
