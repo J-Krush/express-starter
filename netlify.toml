@@ -4,6 +4,6 @@
   publish = "build"
 
 [[redirects]]
-  from = "/elemental-code"
-  to = "/.netlify/functions/elemental-code"
+  from = "/express-starter"
+  to = "/.netlify/functions/express-starter"
   status = 200

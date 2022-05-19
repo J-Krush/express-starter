@@ -1,3 +1,4 @@
-# Elemental Code API
+# NodeJS Express Starter Project
 
-Node API for serving a human's elemental code.
+Node API starter built with Express.
+Netlify build commands for serverless deployment. 

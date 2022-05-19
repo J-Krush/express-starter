@@ -14,7 +14,7 @@ node_modules
 .netlify
 
 # Serverless function bundle
-/netlify/functions/elemental-code/bundle
+/netlify/functions/express-starter/bundle
 
 # temp folder
 /src/temp
