@@ -15,16 +15,3 @@ node_modules
 
 # Serverless function bundle
 /netlify/functions/express-starter/bundle
-
-# temp folder
-/src/temp
-
-# Example files
-/src/helpers/astrochart.js
-/src/helpers/astrochart.min.js
-/src/helpers/mtz-jk-return-planet-positions.json
-/src/helpers/mtz-jk-return.html
-src/constants/mtz.js
-
-# scratch folder
-/scratch/
